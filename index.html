@@ -101,7 +101,7 @@
           </div>
           <div class="activity-item" onclick="toggleCheck('act2')">
             <input type="checkbox" id="act2" onchange="updatePreview()">
-            <div style="flex:1;"><div class="activity-name">🍻 Bacil sano</div><div class="activity-desc">🍻 3 - 5 cheves</div></div>
+            <div style="flex:1;"><div class="activity-name">🍻 Vacil sano</div><div class="activity-desc">🍻 3 - 5 cheves</div></div>
             <span class="pts-badge pos">+2 pts</span>
           </div>
           <div class="activity-item" onclick="toggleCheck('act3')">
@@ -172,16 +172,16 @@
         <div class="rule-desc">🍺 Tomarse 1 - 2 cervezas</div>
       </div>
       <div class="rule-card actividad">
-        <div class="rule-title">🍻 Bacil sano</div>
+        <div class="rule-title">🍻 Vacil sano</div>
         <span class="rule-pts pos">+2 pts</span>
         <div class="rule-desc">🍻 3 - 5 cheves</div>
-        <div class="rule-detail">Reportar Bacil sano activa automaticamente Na' más pa quitarse la sed, aunque no la hayas marcado.</div>
+        <div class="rule-detail">Reportar vacil sano activa automaticamente Na' más pa quitarse la sed, aunque no la hayas marcado.</div>
       </div>
       <div class="rule-card actividad">
         <div class="rule-title">🔞 Plan Tranqui</div>
         <span class="rule-pts pos">+5 pts</span>
         <div class="rule-desc">🔞 Amanecer (4am+) / Emborracharse (6+ cheves) / vomitar / dormir en el piso</div>
-        <div class="rule-detail">Reportar Plan Tranqui activa automaticamente Na' más pa quitarse la sed y Bacil sano, aunque no las hayas marcado.</div>
+        <div class="rule-detail">Reportar Plan Tranqui activa automaticamente Na' más pa quitarse la sed y Vacil sano, aunque no las hayas marcado.</div>
       </div>
       <div class="rule-card actividad">
         <div class="rule-title">📷 Tirar facha</div>
@@ -347,7 +347,7 @@
     const autoRules = calcAutoRules(player, acts, todayStr());
     let autoRulePts = 0, ruleBreakdown = '';
     if(effective.includes('act1') && !acts.includes('act1')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍺 Na más pa quitarse la sed activada automaticamente (+1 pt)</div>';
-    if(effective.includes('act2') && !acts.includes('act2')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Bacil sano activada automaticamente (+2 pts)</div>';
+    if(effective.includes('act2') && !acts.includes('act2')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Vacil sano activada automaticamente (+2 pts)</div>';
     if(autoRules.length > 0) {
       document.getElementById('auto-rules-preview').style.display = 'block';
       document.getElementById('auto-rules-list').innerHTML = autoRules.map(r =>
