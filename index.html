@@ -1,0 +1,413 @@
+
+<h2 class="sr-only">Copa PILSENER 2026 - Activity tracker and leaderboard for 9 players throughout May 2026</h2>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.app { padding: 1rem 0; font-family: var(--font-sans); }
+.tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+.activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+.activity-item input[type=checkbox] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+.activity-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.activity-desc { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.pts-badge { margin-left: auto; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); white-space: nowrap; flex-shrink: 0; }
+.pts-badge.pos { background: #EAF3DE; color: #3B6D11; }
+.pts-badge.neg { background: #FCEBEB; color: #A32D2D; }
+select, button { font-family: var(--font-sans); }
+.submit-btn { width: 100%; padding: 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); font-size: 15px; font-weight: 500; cursor: pointer; color: var(--color-text-primary); margin-top: 12px; }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.player-select { width: 100%; padding: 8px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); font-size: 14px; color: var(--color-text-primary); margin-bottom: 12px; }
+.leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.leaderboard-row:last-child { border-bottom: none; }
+.rank { font-size: 18px; min-width: 32px; }
+.player-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.player-pts { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.pts-label { font-size: 11px; color: var(--color-text-secondary); }
+.alert-box { border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; margin-bottom: 10px; border: 0.5px solid; }
+.alert-info { background: #E6F1FB; border-color: #85B7EB; color: #0C447C; }
+.alert-success { background: #EAF3DE; border-color: #97C459; color: #27500A; }
+.alert-warn { background: #FAEEDA; border-color: #EF9F27; color: #633806; }
+.comodin-btn { width: 100%; padding: 10px; border-radius: var(--border-radius-md); border: 1.5px solid #EF9F27; background: #FAEEDA; font-size: 14px; font-weight: 500; cursor: pointer; color: #633806; margin-bottom: 10px; }
+.comodin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.section-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.summary-pts { font-size: 22px; font-weight: 500; color: var(--color-text-primary); text-align: center; padding: 12px 0; }
+.history-row { font-size: 12px; color: var(--color-text-secondary); padding: 4px 0; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; justify-content: space-between; }
+.rule-card { border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1rem 1.25rem; margin-bottom: 10px; }
+.rule-card.actividad { border-left: 3px solid #639922; }
+.rule-card.automatica { border-left: 3px solid #EF9F27; }
+.rule-card.especial { border-left: 3px solid #E24B4A; }
+.rule-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.rule-desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.rule-detail { font-size: 12px; color: var(--color-text-secondary); font-style: italic; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 6px 10px; }
+.rule-pts { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 10px; border-radius: var(--border-radius-md); margin-bottom: 6px; }
+.rule-pts.pos { background: #EAF3DE; color: #3B6D11; }
+.rule-pts.neg { background: #FCEBEB; color: #A32D2D; }
+.reglamento-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 1.25rem 0 0.5rem; }
+</style>
+
+<div class="app">
+  <div style="margin-bottom: 1.5rem;">
+    <p style="font-size: 22px; font-weight: 500; color: var(--color-text-primary);">🏆🍺 Copa PILSENER 2026 🍺🏆</p>
+    <p style="font-size: 13px; color: var(--color-text-secondary);" id="today-label"></p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('report',this)">Reportar</button>
+    <button class="tab" onclick="switchTab('leaderboard',this)">Tabla</button>
+    <button class="tab" onclick="switchTab('history',this)">Historial</button>
+    <button class="tab" onclick="switchTab('reglamento',this)">Reglamento</button>
+  </div>
+
+  <div id="tab-report" class="section active">
+    <div class="card">
+      <p class="section-label">Quien sos?</p>
+      <select class="player-select" id="player-select" onchange="onPlayerChange()">
+        <option value="">-- Selecciona tu nombre --</option>
+        <option value="Luis">🏆 Luis "El Vagabundo" Pineda</option>
+        <option value="Ale">🥈 Ale "El Putazo" Ascencio</option>
+        <option value="Ariela">🥉 Ariela "La víbora" Rivas</option>
+        <option value="Richard">🍺 Richard "El Litrón" Funes</option>
+        <option value="Nelson">🦽 Nelson "Hocico Caliente" Lopez</option>
+        <option value="Fernanda">👻 Fernanda "La perdida" Tejadita</option>
+        <option value="Neto">🐶 Neto "Perro de raza" Membreño</option>
+        <option value="Ojcar">🍍 Ojcar "La Piña" Sandoval</option>
+        <option value="Rodrigo">🥅 Rodrigo "Trabinho" Flores</option>
+      </select>
+      <div id="already-reported" style="display:none;"></div>
+    </div>
+
+    <div id="report-form" style="display:none;">
+      <div class="card">
+        <p class="section-label">Actividades de hoy</p>
+        <div class="activity-item" onclick="toggleCheck('act1')">
+          <input type="checkbox" id="act1" onchange="updatePreview()">
+          <div style="flex:1;"><div class="activity-name">🍺 Na' más pa quitarse la sed</div><div class="activity-desc">🍺 Tomarse 1 - 2 cervezas</div></div>
+          <span class="pts-badge pos">+1 pt</span>
+        </div>
+        <div class="activity-item" onclick="toggleCheck('act2')">
+          <input type="checkbox" id="act2" onchange="updatePreview()">
+          <div style="flex:1;"><div class="activity-name">🍻 Bacil sano</div><div class="activity-desc">🍻 3 - 5 cheves</div></div>
+          <span class="pts-badge pos">+2 pts</span>
+        </div>
+        <div class="activity-item" onclick="toggleCheck('act3')">
+          <input type="checkbox" id="act3" onchange="updatePreview()">
+          <div style="flex:1;"><div class="activity-name">🔞 Plan Tranqui</div><div class="activity-desc">🔞 Amanecer (4am+) / Emborracharse (6+ cheves) / vomitar / dormir en el piso</div></div>
+          <span class="pts-badge pos">+5 pts</span>
+        </div>
+        <div class="activity-item" onclick="toggleCheck('act4')">
+          <input type="checkbox" id="act4" onchange="updatePreview()">
+          <div style="flex:1;"><div class="activity-name">📷 Tirar facha</div><div class="activity-desc">📷 Subir/aparecer en stories con 🍺 o de joda (bar/club/playa)</div></div>
+          <span class="pts-badge pos">+2 pts</span>
+        </div>
+      </div>
+
+      <div id="auto-rules-preview" style="display:none;" class="card">
+        <p class="section-label">Reglas activadas automaticamente</p>
+        <div id="auto-rules-list"></div>
+      </div>
+
+      <div class="card">
+        <p class="section-label">Comodin (una sola vez en mayo)</p>
+        <button class="comodin-btn" id="comodin-btn" onclick="toggleComodin()">
+          <span id="comodin-label">🔥 Activar Comodin All in — Duplica los puntos de hoy</span>
+        </button>
+        <p style="font-size: 11px; color: var(--color-text-secondary);">Solo podés usar esto una vez en todo mayo. Úsalo sabiamente!</p>
+      </div>
+
+      <div id="points-preview" style="display:none;" class="card">
+        <p class="section-label">Puntos de hoy</p>
+        <div class="summary-pts" id="pts-today">0 pts</div>
+        <div id="rules-breakdown"></div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitReport()" disabled>Reportar jornada</button>
+    </div>
+  </div>
+
+  <div id="tab-leaderboard" class="section">
+    <div class="card">
+      <p class="section-label" style="margin-bottom:12px;">🏆 Tabla de posiciones — Mayo 2026</p>
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-history" class="section">
+    <div class="card">
+      <p class="section-label">Selecciona jugador</p>
+      <select class="player-select" id="history-player-select" onchange="renderHistory()">
+        <option value="">-- Selecciona --</option>
+        <option value="Luis">🏆 Luis "El Vagabundo" Pineda</option>
+        <option value="Ale">🥈 Ale "El Putazo" Ascencio</option>
+        <option value="Ariela">🥉 Ariela "La víbora" Rivas</option>
+        <option value="Richard">🍺 Richard "El Litrón" Funes</option>
+        <option value="Nelson">🦽 Nelson "Hocico Caliente" Lopez</option>
+        <option value="Fernanda">👻 Fernanda "La perdida" Tejadita</option>
+        <option value="Neto">🐶 Neto "Perro de raza" Membreño</option>
+        <option value="Ojcar">🍍 Ojcar "La Piña" Sandoval</option>
+        <option value="Rodrigo">🥅 Rodrigo "Trabinho" Flores</option>
+      </select>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-reglamento" class="section">
+    <p class="reglamento-section-title">Actividades — reportadas por el jugador</p>
+
+    <div class="rule-card actividad">
+      <div class="rule-title">🍺 Na' más pa quitarse la sed</div>
+      <span class="rule-pts pos">+1 pt</span>
+      <div class="rule-desc">🍺 Tomarse 1 - 2 cervezas</div>
+    </div>
+    <div class="rule-card actividad">
+      <div class="rule-title">🍻 Bacil sano</div>
+      <span class="rule-pts pos">+2 pts</span>
+      <div class="rule-desc">🍻 3 - 5 cheves</div>
+      <div class="rule-detail">Reportar Bacil sano activa automaticamente Na' más pa quitarse la sed, aunque no la hayas marcado.</div>
+    </div>
+    <div class="rule-card actividad">
+      <div class="rule-title">🔞 Plan Tranqui</div>
+      <span class="rule-pts pos">+5 pts</span>
+      <div class="rule-desc">🔞 Amanecer (4am+) / Emborracharse (6+ cheves) / vomitar / dormir en el piso</div>
+      <div class="rule-detail">Reportar Plan Tranqui activa automaticamente Na' más pa quitarse la sed y Bacil sano, aunque no las hayas marcado.</div>
+    </div>
+    <div class="rule-card actividad">
+      <div class="rule-title">📷 Tirar facha</div>
+      <span class="rule-pts pos">+2 pts</span>
+      <div class="rule-desc">📷 Subir/aparecer en stories con 🍺 o de joda (bar/club/playa)</div>
+    </div>
+
+    <p class="reglamento-section-title">Reglas especiales — se activan automaticamente</p>
+
+    <div class="rule-card automatica">
+      <div class="rule-title">🚱 Semana seca</div>
+      <span class="rule-pts neg">-5 pts</span>
+      <div class="rule-desc">🚱 7 días seguidos sin tomar</div>
+      <div class="rule-detail">Se activa automaticamente cuando un jugador no reporta ninguna actividad por 7 días seguidos. Una vez activada, el conteo reinicia.</div>
+    </div>
+    <div class="rule-card automatica">
+      <div class="rule-title">🧐 Buscá oficio!</div>
+      <span class="rule-pts pos">+2 pts</span>
+      <div class="rule-desc">🧐 Tomar entre Domingo - Miércoles</div>
+      <div class="rule-detail">Se activa automaticamente cuando cualquier actividad es reportada en domingo, lunes, martes o miércoles.</div>
+    </div>
+    <div class="rule-card automatica">
+      <div class="rule-title">🛹 Agarró Patín</div>
+      <span class="rule-pts pos">+3 pts</span>
+      <div class="rule-desc">🛹 Tomar 2 días seguidos</div>
+      <div class="rule-detail">Se activa automaticamente cuando un jugador reporta actividad 2 días seguidos.</div>
+    </div>
+    <div class="rule-card automatica">
+      <div class="rule-title">⚰️ Hasta ver a Dios</div>
+      <span class="rule-pts pos">+5 pts</span>
+      <div class="rule-desc">⚰️ Tomar 3 días seguidos</div>
+      <div class="rule-detail">Se activa automaticamente al llegar a 3 o más días seguidos activos. Si se superan los 3 días, sigue aplicando por cada día adicional (pero ya no aplica Agarró Patín).</div>
+    </div>
+
+    <p class="reglamento-section-title">Comodin — activado por el jugador</p>
+
+    <div class="rule-card especial">
+      <div class="rule-title">🔥 Comodin All in</div>
+      <span class="rule-pts pos">x2 puntos</span>
+      <div class="rule-desc">🔥 Duplica los puntos de la jornada</div>
+      <div class="rule-detail">El jugador lo activa manualmente al momento de reportar. Duplica el total de puntos de esa jornada (incluyendo todas las reglas automaticas). Solo se puede usar UNA VEZ durante todo mayo.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLAYERS = ['Luis','Ale','Ariela','Richard','Nelson','Fernanda','Neto','Ojcar','Rodrigo'];
+const PLAYER_LABELS = {
+  Luis:'🏆 Luis "El Vagabundo" Pineda', Ale:'🥈 Ale "El Putazo" Ascencio',
+  Ariela:'🥉 Ariela "La víbora" Rivas', Richard:'🍺 Richard "El Litrón" Funes',
+  Nelson:'🦽 Nelson "Hocico Caliente" Lopez', Fernanda:'👻 Fernanda "La perdida" Tejadita',
+  Neto:'🐶 Neto "Perro de raza" Membreño', Ojcar:'🍍 Ojcar "La Piña" Sandoval',
+  Rodrigo:'🥅 Rodrigo "Trabinho" Flores'
+};
+const RANK_ICONS = ['🥇','🥈','🥉','4.','5.','6.','7.','8.','9.'];
+let state = { reports:{}, comodinesUsed:{} };
+let comodinActive = false;
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+async function loadState() {
+  try { const r = await window.storage.get('copa_pilsener_2026',true); if(r&&r.value) state=JSON.parse(r.value); } catch(e) {}
+}
+async function saveState() {
+  try { await window.storage.set('copa_pilsener_2026',JSON.stringify(state),true); } catch(e) {}
+}
+
+function getPlayerReports(p) { return state.reports[p]||{}; }
+function hasReportedToday(p) { return !!getPlayerReports(p)[todayStr()]; }
+
+function getConsecutiveDays(player) {
+  const reports = getPlayerReports(player);
+  let streak = 0;
+  const today = new Date(todayStr());
+  for(let i=0;i<31;i++) {
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const ds = d.toISOString().split('T')[0];
+    if(reports[ds]&&reports[ds].basePoints>0) streak++; else break;
+  }
+  return streak;
+}
+
+function getDaysSinceLastReport(player) {
+  const reports = getPlayerReports(player);
+  const dates = Object.keys(reports).filter(d=>reports[d].basePoints>0).sort().reverse();
+  if(!dates.length) return 999;
+  return Math.floor((new Date(todayStr())-new Date(dates[0]))/86400000);
+}
+
+function calcAutoRules(player, acts, dateStr) {
+  const rules = [];
+  if(!acts.length) return rules;
+  const dow = new Date(dateStr).getDay();
+  if([0,1,2,3].includes(dow)) rules.push({id:'r6',name:'🧐 Buscá oficio!',desc:'Tomar entre Domingo - Miércoles',pts:2});
+  const reports = getPlayerReports(player);
+  const yesterday = new Date(dateStr); yesterday.setDate(yesterday.getDate()-1);
+  const yStr = yesterday.toISOString().split('T')[0];
+  if(reports[yStr]&&reports[yStr].basePoints>0) {
+    const streak = getConsecutiveDays(player);
+    if(streak>=2) rules.push({id:'r7',name:'🛹 Agarró Patín',desc:'Tomar 2 días seguidos',pts:3});
+    if(streak>=3) rules.push({id:'r8',name:'⚰️ Hasta ver a Dios',desc:'Tomar 3 días seguidos',pts:5});
+  }
+  return rules;
+}
+
+function calcBasePoints(acts) {
+  const effective = new Set(acts);
+  if(effective.has('act3')){effective.add('act1');effective.add('act2');}
+  if(effective.has('act2')) effective.add('act1');
+  let pts=0;
+  if(effective.has('act1')) pts+=1;
+  if(effective.has('act2')) pts+=2;
+  if(effective.has('act3')) pts+=5;
+  if(effective.has('act4')) pts+=2;
+  return {pts, effective:Array.from(effective)};
+}
+
+function updatePreview() {
+  const player = document.getElementById('player-select').value;
+  const acts = ['act1','act2','act3','act4'].filter(a=>document.getElementById(a).checked);
+  const hasAny = acts.length>0;
+  document.getElementById('submit-btn').disabled = !hasAny;
+  document.getElementById('points-preview').style.display = hasAny?'block':'none';
+  document.getElementById('auto-rules-preview').style.display = 'none';
+  if(!hasAny){document.getElementById('pts-today').textContent='0 pts';return;}
+  const {pts:basePts,effective} = calcBasePoints(acts);
+  const autoRules = calcAutoRules(player,acts,todayStr());
+  let autoRulePts=0, ruleBreakdown='';
+  if(effective.includes('act1')&&!acts.includes('act1')) ruleBreakdown+='<div class="alert-box alert-info" style="margin-bottom:6px;">🍺 Na más pa quitarse la sed activada automaticamente (+1 pt)</div>';
+  if(effective.includes('act2')&&!acts.includes('act2')) ruleBreakdown+='<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Bacil sano activada automaticamente (+2 pts)</div>';
+  if(autoRules.length>0) {
+    document.getElementById('auto-rules-preview').style.display='block';
+    document.getElementById('auto-rules-list').innerHTML=autoRules.map(r=>`<div style="padding:8px 12px;border-radius:var(--border-radius-md);margin-bottom:6px;background:#FAEEDA;border:0.5px solid #FAC775;color:#633806;font-size:13px;"><strong>${r.name}</strong> — ${r.desc} <strong>(+${r.pts} pts)</strong></div>`).join('');
+    autoRules.forEach(r=>autoRulePts+=r.pts);
+  }
+  const subTotal = basePts+autoRulePts;
+  const finalPts = comodinActive?subTotal*2:subTotal;
+  document.getElementById('pts-today').textContent = finalPts+(comodinActive?' pts (x2 🔥 Comodin!)':' pts');
+  document.getElementById('rules-breakdown').innerHTML = ruleBreakdown;
+}
+
+function toggleCheck(id) { const cb=document.getElementById(id); cb.checked=!cb.checked; updatePreview(); }
+
+function toggleComodin() {
+  const player=document.getElementById('player-select').value;
+  if(!player||state.comodinesUsed[player]) return;
+  comodinActive=!comodinActive;
+  const btn=document.getElementById('comodin-btn');
+  if(comodinActive){btn.style.background='#EF9F27';btn.style.color='#fff';document.getElementById('comodin-label').textContent='🔥 Comodin ACTIVADO! Toca de nuevo para desactivar';}
+  else{btn.style.background='#FAEEDA';btn.style.color='#633806';document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy';}
+  updatePreview();
+}
+
+function onPlayerChange() {
+  const player=document.getElementById('player-select').value;
+  comodinActive=false;
+  ['act1','act2','act3','act4'].forEach(a=>{document.getElementById(a).checked=false;});
+  document.getElementById('points-preview').style.display='none';
+  document.getElementById('auto-rules-preview').style.display='none';
+  document.getElementById('submit-btn').disabled=true;
+  document.getElementById('already-reported').innerHTML='';
+  document.getElementById('already-reported').style.display='none';
+  if(!player){document.getElementById('report-form').style.display='none';return;}
+  if(hasReportedToday(player)){
+    document.getElementById('already-reported').style.display='block';
+    document.getElementById('already-reported').innerHTML='<div class="alert-box alert-warn">Ya reportaste hoy. Volvé mañana!</div>';
+    document.getElementById('report-form').style.display='none';return;
+  }
+  document.getElementById('report-form').style.display='block';
+  const btn=document.getElementById('comodin-btn');
+  if(state.comodinesUsed[player]){btn.disabled=true;document.getElementById('comodin-label').textContent='🔥 Comodin ya usado este mes';}
+  else{btn.disabled=false;btn.style.background='#FAEEDA';btn.style.color='#633806';document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy';}
+}
+
+async function submitReport() {
+  const player=document.getElementById('player-select').value;
+  if(!player) return;
+  const acts=['act1','act2','act3','act4'].filter(a=>document.getElementById(a).checked);
+  if(!acts.length) return;
+  const {pts:basePts,effective}=calcBasePoints(acts);
+  const autoRules=calcAutoRules(player,acts,todayStr());
+  let autoRulePts=0; autoRules.forEach(r=>autoRulePts+=r.pts);
+  const subTotal=basePts+autoRulePts;
+  const finalPts=comodinActive?subTotal*2:subTotal;
+  if(!state.reports[player]) state.reports[player]={};
+  state.reports[player][todayStr()]={acts:effective,autoRules:autoRules.map(r=>r.id),basePoints:basePts,autoPoints:autoRulePts,comodinUsed:comodinActive,totalPoints:finalPts};
+  if(comodinActive) state.comodinesUsed[player]=true;
+  await saveState();
+  comodinActive=false;
+  document.getElementById('report-form').style.display='none';
+  document.getElementById('already-reported').style.display='block';
+  document.getElementById('already-reported').innerHTML=`<div class="alert-box alert-success">Jornada reportada! +${finalPts} pts hoy. Volves mañana!</div>`;
+  renderLeaderboard();
+}
+
+function getTotalPoints(player) {
+  const reports=getPlayerReports(player);
+  let total=0;
+  Object.values(reports).forEach(r=>total+=(r.totalPoints||0));
+  const daysSince=getDaysSinceLastReport(player);
+  if(daysSince>=7) total-=Math.floor(daysSince/7)*5;
+  return total;
+}
+
+function renderLeaderboard() {
+  const sorted=[...PLAYERS].map(p=>({p,pts:getTotalPoints(p)})).sort((a,b)=>b.pts-a.pts);
+  document.getElementById('leaderboard-list').innerHTML=sorted.map((item,i)=>
+    `<div class="leaderboard-row"><span class="rank">${RANK_ICONS[i]}</span><span class="player-name">${PLAYER_LABELS[item.p]}</span><span class="player-pts">${item.pts} <span class="pts-label">pts</span></span></div>`
+  ).join('');
+}
+
+function renderHistory() {
+  const player=document.getElementById('history-player-select').value;
+  const list=document.getElementById('history-list');
+  if(!player){list.innerHTML='';return;}
+  const reports=getPlayerReports(player);
+  const dates=Object.keys(reports).sort().reverse();
+  if(!dates.length){list.innerHTML='<p style="font-size:13px;color:var(--color-text-secondary);padding-top:8px;">Sin reportes aún.</p>';return;}
+  list.innerHTML=dates.map(d=>{
+    const r=reports[d];
+    return `<div class="history-row"><span>${d}</span><span style="font-size:13px;color:var(--color-text-primary);font-weight:500;">+${r.totalPoints} pts${r.comodinUsed?' 🔥':''}</span></div>`;
+  }).join('');
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='leaderboard') renderLeaderboard();
+}
+
+const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const now=new Date();
+document.getElementById('today-label').textContent=days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' 2026';
+loadState().then(()=>renderLeaderboard());
+</script>
