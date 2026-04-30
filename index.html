@@ -3,12 +3,13 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 .app { padding: 1rem 0; font-family: var(--font-sans); }
+body { background-color: #000000; color: #ffffff; }
 .tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .tab { padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); }
 .tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
 .section { display: none; }
 .section.active { display: block; }
-.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.card { background: #111111; border: 0.5px solid #333333; border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
 .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
 .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
 .activity-item input[type=checkbox] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
@@ -370,6 +371,8 @@ async function submitReport() {
 
 function getTotalPoints(player) {
   const reports=getPlayerReports(player);
+  const dates=Object.keys(reports);
+  if(!dates.length) return 0;
   let total=0;
   Object.values(reports).forEach(r=>total+=(r.totalPoints||0));
   const daysSince=getDaysSinceLastReport(player);
