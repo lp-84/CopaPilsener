@@ -76,6 +76,7 @@
     <!-- REPORTAR -->
     <div id="tab-report" class="section active">
       <div class="card">
+        <div class="alert-box alert-warn" style="font-size:14px;font-weight:500;" id="reporting-date-banner"></div>
         <p class="section-label">Quien sos?</p>
         <select class="player-select" id="player-select" onchange="onPlayerChange()">
           <option value="">-- Selecciona tu nombre --</option>
@@ -256,7 +257,16 @@
   let comodinActive = false;
 
   function todayStr() { return new Date().toISOString().split('T')[0]; }
-
+  function reportingDateStr() {
+  const d = new Date(); d.setDate(d.getDate()-1);
+  return d.toISOString().split('T')[0];
+}
+function formatDateSpanish(dateStr) {
+  const _days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const _months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const d = new Date(dateStr+'T12:00:00');
+  return _days[d.getDay()]+' '+d.getDate()+' de '+_months[d.getMonth()];
+}
   async function loadState() {
     try {
       const snapshot = await get(ref(db, 'state'));
@@ -286,12 +296,12 @@
   });
 
   function getPlayerReports(p) { return state.reports[p] || {}; }
-  function hasReportedToday(p) { return !!getPlayerReports(p)[todayStr()]; }
+  function hasReportedToday(p) { return !!getPlayerReports(p)[reportingDateStr()]; }
 
   function getConsecutiveDays(player) {
     const reports = getPlayerReports(player);
     let streak = 0;
-    const today = new Date(todayStr());
+    const today = new Date(reportingDateStr()+'T12:00:00');
     for(let i=0;i<31;i++) {
       const d = new Date(today); d.setDate(d.getDate()-i);
       const ds = d.toISOString().split('T')[0];
@@ -304,13 +314,13 @@
     const reports = getPlayerReports(player);
     const dates = Object.keys(reports).filter(d=>reports[d].basePoints>0).sort().reverse();
     if(!dates.length) return 0;
-    return Math.floor((new Date(todayStr()) - new Date(dates[0])) / 86400000);
+    return Math.floor((new Date(reportingDateStr()+'T12:00:00')-new Date(dates[0]+'T12:00:00'))/86400000);
   }
 
   function calcAutoRules(player, acts, dateStr) {
     const rules = [];
     if(!acts.length) return rules;
-    const dow = new Date(dateStr).getDay();
+    const dow = new Date(dateStr+'T12:00:00').getDay();
     if([0,1,2,3].includes(dow)) rules.push({id:'r6',name:'🧐 Buscá oficio!',desc:'Tomar entre Domingo - Miércoles',pts:2});
     const reports = getPlayerReports(player);
     const yesterday = new Date(dateStr); yesterday.setDate(yesterday.getDate()-1);
@@ -344,7 +354,7 @@
     document.getElementById('auto-rules-preview').style.display = 'none';
     if(!hasAny) { document.getElementById('pts-today').textContent='0 pts'; return; }
     const {pts:basePts, effective} = calcBasePoints(acts);
-    const autoRules = calcAutoRules(player, acts, todayStr());
+    const autoRules = calcAutoRules(player, acts, reportingDateStr());
     let autoRulePts = 0, ruleBreakdown = '';
     if(effective.includes('act1') && !acts.includes('act1')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍺 Na más pa quitarse la sed activada automaticamente (+1 pt)</div>';
     if(effective.includes('act2') && !acts.includes('act2')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Vacil sano activada automaticamente (+2 pts)</div>';
@@ -402,12 +412,12 @@
     const acts = ['act1','act2','act3','act4'].filter(a=>document.getElementById(a).checked);
     if(!acts.length) return;
     const {pts:basePts, effective} = calcBasePoints(acts);
-    const autoRules = calcAutoRules(player, acts, todayStr());
+    const autoRules = calcAutoRules(player,acts,reportingDateStr());
     let autoRulePts = 0; autoRules.forEach(r => autoRulePts += r.pts);
     const subTotal = basePts + autoRulePts;
     const finalPts = comodinActive ? subTotal * 2 : subTotal;
     if(!state.reports[player]) state.reports[player] = {};
-    state.reports[player][todayStr()] = { acts:effective, autoRules:autoRules.map(r=>r.id), basePoints:basePts, autoPoints:autoRulePts, comodinUsed:comodinActive, totalPoints:finalPts };
+    state.reports[player][reportingDateStr()] = { acts:effective, autoRules:autoRules.map(r=>r.id), basePoints:basePts, autoPoints:autoRulePts, comodinUsed:comodinActive, totalPoints:finalPts };
     if(comodinActive) state.comodinesUsed[player] = true;
     await saveState();
     comodinActive = false;
@@ -459,7 +469,9 @@
   const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const now = new Date();
   document.getElementById('today-label').textContent = days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' 2026';
-
+  const _rd = new Date(); _rd.setDate(_rd.getDate()-1);
+  const _rdLabel = formatDateSpanish(_rd.toISOString().split('T')[0]);
+  document.getElementById('reporting-date-banner').textContent = '⚠️ Recordá que estás reportando la actividad correspondiente al '+_rdLabel;
   loadState();
 </script>
 </body>
