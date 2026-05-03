@@ -256,12 +256,9 @@
   let state = { reports:{}, comodinesUsed:{} };
   let comodinActive = false;
 
-  function todayStr() {
-  return new Date(new Date().toLocaleString('en-US', {timeZone:'America/El_Salvador'})).toISOString().split('T')[0];
-}
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
   function reportingDateStr() {
-  const d = new Date(new Date().toLocaleString('en-US', {timeZone:'America/El_Salvador'}));
-  d.setDate(d.getDate()-1);
+  const d = new Date(); d.setDate(d.getDate()-1);
   return d.toISOString().split('T')[0];
 }
 function formatDateSpanish(dateStr) {
