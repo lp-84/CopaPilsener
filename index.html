@@ -37,12 +37,22 @@
     .alert-info { background: #0a1a2a; border-color: #2a5a8a; color: #7ab8f5; }
     .alert-success { background: #0a2a0a; border-color: #2a6a2a; color: #7ecb3b; }
     .alert-warn { background: #2a1a00; border-color: #6a4a00; color: #f5c842; }
-    .alert-danger { background: #2a0a0a; border-color: #6a2a2a; color: #f07070; }
     .comodin-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid #EF9F27; background: #2a1a00; font-size: 14px; font-weight: 500; cursor: pointer; color: #f5c842; margin-bottom: 10px; }
     .comodin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .section-label { font-size: 12px; font-weight: 500; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
     .summary-pts { font-size: 22px; font-weight: 500; color: #fff; text-align: center; padding: 12px 0; }
-    .history-row { font-size: 12px; color: #aaa; padding: 4px 0; border-bottom: 0.5px solid #222; display: flex; justify-content: space-between; }
+    .auto-rule-tag { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; background: #2a1a00; border: 0.5px solid #6a4a00; color: #f5c842; font-size: 13px; }
+    /* History styles */
+    .history-entry { border: 0.5px solid #222; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .history-entry-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1a1a1a; }
+    .history-entry-date { font-size: 13px; color: #aaa; }
+    .history-entry-pts { font-size: 14px; color: #7ecb3b; font-weight: 600; }
+    .history-entry-body { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 4px; }
+    .htag { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 10px; }
+    .htag.act { background: #1a3a0a; color: #7ecb3b; border: 0.5px solid #2d5a14; }
+    .htag.auto { background: #2a1a00; color: #f5c842; border: 0.5px solid #6a4a00; }
+    .htag.comodin { background: #3a0a3a; color: #e070e0; border: 0.5px solid #6a1a6a; }
+    /* Reglamento */
     .rule-card { border-radius: 12px; border: 0.5px solid #333; padding: 1rem 1.25rem; margin-bottom: 10px; background: #111; }
     .rule-card.actividad { border-left: 3px solid #639922; }
     .rule-card.automatica { border-left: 3px solid #EF9F27; }
@@ -75,8 +85,8 @@
 
     <!-- REPORTAR -->
     <div id="tab-report" class="section active">
+      <div class="alert-box alert-warn" style="font-size:14px;font-weight:500;" id="reporting-date-banner"></div>
       <div class="card">
-        <div class="alert-box alert-warn" style="font-size:14px;font-weight:500;" id="reporting-date-banner"></div>
         <p class="section-label">Quien sos?</p>
         <select class="player-select" id="player-select" onchange="onPlayerChange()">
           <option value="">-- Selecciona tu nombre --</option>
@@ -92,9 +102,10 @@
         </select>
         <div id="already-reported" style="display:none;"></div>
       </div>
+
       <div id="report-form" style="display:none;">
         <div class="card">
-          <p class="section-label">Actividades de hoy</p>
+          <p class="section-label" id="activities-label">Actividades a reportar</p>
           <div class="activity-item" onclick="toggleCheck('act1')">
             <input type="checkbox" id="act1" onchange="updatePreview()">
             <div style="flex:1;"><div class="activity-name">🍺 Na' más pa quitarse la sed</div><div class="activity-desc">🍺 Tomarse 1 - 2 cervezas</div></div>
@@ -116,10 +127,12 @@
             <span class="pts-badge pos">+2 pts</span>
           </div>
         </div>
+
         <div id="auto-rules-preview" style="display:none;" class="card">
-          <p class="section-label">Reglas activadas automaticamente</p>
+          <p class="section-label">⚡ Reglas activadas automaticamente</p>
           <div id="auto-rules-list"></div>
         </div>
+
         <div class="card">
           <p class="section-label">Comodin (una sola vez en mayo)</p>
           <button class="comodin-btn" id="comodin-btn" onclick="toggleComodin()">
@@ -127,11 +140,13 @@
           </button>
           <p style="font-size:11px;color:#666;">Solo podés usar esto una vez en todo mayo. Úsalo sabiamente!</p>
         </div>
+
         <div id="points-preview" style="display:none;" class="card">
-          <p class="section-label">Puntos de hoy</p>
+          <p class="section-label">Resumen de puntos</p>
           <div class="summary-pts" id="pts-today">0 pts</div>
           <div id="rules-breakdown"></div>
         </div>
+
         <button class="submit-btn" id="submit-btn" onclick="submitReport()" disabled>Reportar jornada</button>
       </div>
     </div>
@@ -176,7 +191,7 @@
         <div class="rule-title">🍻 Vacil sano</div>
         <span class="rule-pts pos">+2 pts</span>
         <div class="rule-desc">🍻 3 - 5 cheves</div>
-        <div class="rule-detail">Reportar vacil sano activa automaticamente Na' más pa quitarse la sed, aunque no la hayas marcado.</div>
+        <div class="rule-detail">Reportar Vacil sano activa automaticamente Na' más pa quitarse la sed, aunque no la hayas marcado.</div>
       </div>
       <div class="rule-card actividad">
         <div class="rule-title">🔞 Plan Tranqui</div>
@@ -206,13 +221,13 @@
         <div class="rule-title">🛹 Agarró Patín</div>
         <span class="rule-pts pos">+3 pts</span>
         <div class="rule-desc">🛹 Tomar 2 días seguidos</div>
-        <div class="rule-detail">Se activa automaticamente cuando un jugador reporta actividad 2 días seguidos.</div>
+        <div class="rule-detail">Se activa automaticamente cuando un jugador reporta actividad exactamente 2 días seguidos.</div>
       </div>
       <div class="rule-card automatica">
         <div class="rule-title">⚰️ Hasta ver a Dios</div>
         <span class="rule-pts pos">+5 pts</span>
-        <div class="rule-desc">⚰️ Tomar 3 días seguidos</div>
-        <div class="rule-detail">Se activa automaticamente al llegar a 3 o más días seguidos activos. Si se superan los 3 días, sigue aplicando por cada día adicional (pero ya no aplica Agarró Patín).</div>
+        <div class="rule-desc">⚰️ Tomar 3 o más días seguidos</div>
+        <div class="rule-detail">Se activa automaticamente al llegar a 3 o más días seguidos activos. Reemplaza Agarró Patín a partir del 3er día.</div>
       </div>
       <p class="reglamento-section-title">Comodin — activado por el jugador</p>
       <div class="rule-card especial">
@@ -225,7 +240,6 @@
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -253,26 +267,61 @@
   };
   const RANK_ICONS = ['🥇','🥈','🥉','4.','5.','6.','7.','8.','9.'];
 
+  const ACT_LABELS = {
+    act1: '🍺 Na más pa quitarse la sed (+1)',
+    act2: '🍻 Vacil sano (+2)',
+    act3: '🔞 Plan Tranqui (+5)',
+    act4: '📷 Tirar facha (+2)'
+  };
+  const RULE_LABELS = {
+    r6: '🧐 Buscá oficio! (+2)',
+    r7: '🛹 Agarró Patín (+3)',
+    r8: '⚰️ Hasta ver a Dios (+5)'
+  };
+
   let state = { reports:{}, comodinesUsed:{} };
   let comodinActive = false;
 
-  function todayStr() { return new Date().toISOString().split('T')[0]; }
-  function reportingDateStr() {
-  const d = new Date(); d.setDate(d.getDate()-1);
-  return d.toISOString().split('T')[0];
-}
-function formatDateSpanish(dateStr) {
-  const _days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const _months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const d = new Date(dateStr+'T12:00:00');
-  return _days[d.getDay()]+' '+d.getDate()+' de '+_months[d.getMonth()];
-}
+  // ── TIMEZONE: El Salvador is always UTC-6, no DST ──
+  function getSVDateStr(offsetDays = 0) {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    const svMs = utcMs + (-6 * 60 * 60000); // UTC-6
+    const sv = new Date(svMs + offsetDays * 86400000);
+    const y = sv.getFullYear();
+    const m = String(sv.getMonth()+1).padStart(2,'0');
+    const d = String(sv.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function todayStr()     { return getSVDateStr(0);  } // actual SV date
+  function reportingDateStr() { return getSVDateStr(-1); } // yesterday SV = what we're reporting
+
+  function parseDateParts(dateStr) {
+    const p = dateStr.split('-');
+    return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]), 12, 0, 0);
+  }
+
+  function addDays(dateStr, n) {
+    const d = parseDateParts(dateStr);
+    d.setDate(d.getDate()+n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatDateSpanish(dateStr) {
+    const DAYS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const d = parseDateParts(dateStr);
+    return DAYS[d.getDay()]+' '+d.getDate()+' de '+MONTHS[d.getMonth()];
+  }
+
+  // ── FIREBASE ──
   async function loadState() {
     try {
-      const snapshot = await get(ref(db, 'state'));
-      if (snapshot.exists()) state = snapshot.val();
-      if (!state.reports) state.reports = {};
-      if (!state.comodinesUsed) state.comodinesUsed = {};
+      const snap = await get(ref(db,'state'));
+      if(snap.exists()) state = snap.val();
+      if(!state.reports) state.reports = {};
+      if(!state.comodinesUsed) state.comodinesUsed = {};
     } catch(e) { console.error(e); }
     document.getElementById('loading').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
@@ -280,32 +329,33 @@ function formatDateSpanish(dateStr) {
   }
 
   async function saveState() {
-    try { await set(ref(db, 'state'), state); } catch(e) { console.error(e); }
+    try { await set(ref(db,'state'), state); } catch(e) { console.error(e); }
   }
 
-  // Listen for real-time updates
-  onValue(ref(db, 'state'), (snapshot) => {
-    if (snapshot.exists()) {
-      state = snapshot.val();
-      if (!state.reports) state.reports = {};
-      if (!state.comodinesUsed) state.comodinesUsed = {};
+  onValue(ref(db,'state'), (snap) => {
+    if(snap.exists()) {
+      state = snap.val();
+      if(!state.reports) state.reports = {};
+      if(!state.comodinesUsed) state.comodinesUsed = {};
       renderLeaderboard();
       const hp = document.getElementById('history-player-select').value;
-      if (hp) renderHistory();
+      if(hp) renderHistory();
     }
   });
 
+  // ── HELPERS ──
   function getPlayerReports(p) { return state.reports[p] || {}; }
+  // Block re-reporting: stored under reportingDateStr (yesterday)
   function hasReportedToday(p) { return !!getPlayerReports(p)[reportingDateStr()]; }
 
-  function getConsecutiveDays(player) {
+  // Count consecutive days with activity, ending at dateStr (inclusive)
+  function streakEndingAt(player, dateStr) {
     const reports = getPlayerReports(player);
     let streak = 0;
-    const today = new Date(reportingDateStr()+'T12:00:00');
-    for(let i=0;i<31;i++) {
-      const d = new Date(today); d.setDate(d.getDate()-i);
-      const ds = d.toISOString().split('T')[0];
-      if(reports[ds] && reports[ds].basePoints > 0) streak++; else break;
+    for(let i=0; i<31; i++) {
+      const ds = addDays(dateStr, -i);
+      if(reports[ds] && reports[ds].basePoints > 0) streak++;
+      else break;
     }
     return streak;
   }
@@ -314,22 +364,41 @@ function formatDateSpanish(dateStr) {
     const reports = getPlayerReports(player);
     const dates = Object.keys(reports).filter(d=>reports[d].basePoints>0).sort().reverse();
     if(!dates.length) return 0;
-    return Math.floor((new Date(reportingDateStr()+'T12:00:00')-new Date(dates[0]+'T12:00:00'))/86400000);
+    const d1 = parseDateParts(reportingDateStr());
+    const d2 = parseDateParts(dates[0]);
+    return Math.round((d1-d2)/86400000);
   }
 
+  // ── RULES ENGINE ──
   function calcAutoRules(player, acts, dateStr) {
     const rules = [];
     if(!acts.length) return rules;
-    const dow = new Date(dateStr+'T12:00:00').getDay();
-    if([0,1,2,3].includes(dow)) rules.push({id:'r6',name:'🧐 Buscá oficio!',desc:'Tomar entre Domingo - Miércoles',pts:2});
+
+    // Rule 6: Buscá oficio — activity on Sun(0) Mon(1) Tue(2) Wed(3)
+    const dow = parseDateParts(dateStr).getDay();
+    if([0,1,2,3].includes(dow))
+      rules.push({id:'r6', name:'🧐 Buscá oficio!', pts:2});
+
+    // Rules 7 & 8: consecutive days
+    // dayBefore = the day before dateStr
+    const dayBefore = addDays(dateStr, -1);
     const reports = getPlayerReports(player);
-    const yesterday = new Date(dateStr); yesterday.setDate(yesterday.getDate()-1);
-    const yStr = yesterday.toISOString().split('T')[0];
-    if(reports[yStr] && reports[yStr].basePoints > 0) {
-      const streak = getConsecutiveDays(player);
-      if(streak >= 2) rules.push({id:'r7',name:'🛹 Agarró Patín',desc:'Tomar 2 días seguidos',pts:3});
-      if(streak >= 3) rules.push({id:'r8',name:'⚰️ Hasta ver a Dios',desc:'Tomar 3 días seguidos',pts:5});
+
+    if(reports[dayBefore] && reports[dayBefore].basePoints > 0) {
+      // streak BEFORE today's report = streak ending at dayBefore
+      const prevStreak = streakEndingAt(player, dayBefore);
+      // after submitting dateStr the new streak = prevStreak + 1
+      const newStreak = prevStreak + 1;
+
+      if(newStreak >= 3) {
+        // 3+ days: Hasta ver a Dios only (replaces Agarró Patín)
+        rules.push({id:'r8', name:'⚰️ Hasta ver a Dios', pts:5});
+      } else {
+        // exactly 2 days: Agarró Patín
+        rules.push({id:'r7', name:'🛹 Agarró Patín', pts:3});
+      }
     }
+
     return rules;
   }
 
@@ -345,6 +414,7 @@ function formatDateSpanish(dateStr) {
     return { pts, effective: Array.from(effective) };
   }
 
+  // ── UI ──
   window.updatePreview = function() {
     const player = document.getElementById('player-select').value;
     const acts = ['act1','act2','act3','act4'].filter(a=>document.getElementById(a).checked);
@@ -353,22 +423,30 @@ function formatDateSpanish(dateStr) {
     document.getElementById('points-preview').style.display = hasAny ? 'block' : 'none';
     document.getElementById('auto-rules-preview').style.display = 'none';
     if(!hasAny) { document.getElementById('pts-today').textContent='0 pts'; return; }
+
     const {pts:basePts, effective} = calcBasePoints(acts);
     const autoRules = calcAutoRules(player, acts, reportingDateStr());
-    let autoRulePts = 0, ruleBreakdown = '';
-    if(effective.includes('act1') && !acts.includes('act1')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍺 Na más pa quitarse la sed activada automaticamente (+1 pt)</div>';
-    if(effective.includes('act2') && !acts.includes('act2')) ruleBreakdown += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Vacil sano activada automaticamente (+2 pts)</div>';
+    let autoRulePts = 0, cascade = '';
+
+    if(effective.includes('act1') && !acts.includes('act1'))
+      cascade += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍺 Na más pa quitarse la sed activada automaticamente (+1 pt)</div>';
+    if(effective.includes('act2') && !acts.includes('act2'))
+      cascade += '<div class="alert-box alert-info" style="margin-bottom:6px;">🍻 Vacil sano activada automaticamente (+2 pts)</div>';
+
     if(autoRules.length > 0) {
       document.getElementById('auto-rules-preview').style.display = 'block';
       document.getElementById('auto-rules-list').innerHTML = autoRules.map(r =>
-        `<div style="padding:8px 12px;border-radius:8px;margin-bottom:6px;background:#2a1a00;border:0.5px solid #6a4a00;color:#f5c842;font-size:13px;"><strong>${r.name}</strong> — ${r.desc} <strong>(+${r.pts} pts)</strong></div>`
+        `<div class="auto-rule-tag"><strong>${r.name}</strong> <strong>(+${r.pts} pts)</strong></div>`
       ).join('');
       autoRules.forEach(r => autoRulePts += r.pts);
+    } else {
+      document.getElementById('auto-rules-list').innerHTML = '';
     }
+
     const subTotal = basePts + autoRulePts;
     const finalPts = comodinActive ? subTotal * 2 : subTotal;
     document.getElementById('pts-today').textContent = finalPts + (comodinActive ? ' pts (x2 🔥 Comodin!)' : ' pts');
-    document.getElementById('rules-breakdown').innerHTML = ruleBreakdown;
+    document.getElementById('rules-breakdown').innerHTML = cascade;
   }
 
   window.toggleCheck = function(id) {
@@ -380,30 +458,40 @@ function formatDateSpanish(dateStr) {
     if(!player || state.comodinesUsed[player]) return;
     comodinActive = !comodinActive;
     const btn = document.getElementById('comodin-btn');
-    if(comodinActive) { btn.style.background='#EF9F27'; btn.style.color='#000'; document.getElementById('comodin-label').textContent='🔥 Comodin ACTIVADO! Toca de nuevo para desactivar'; }
-    else { btn.style.background='#2a1a00'; btn.style.color='#f5c842'; document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy'; }
+    if(comodinActive) {
+      btn.style.background='#EF9F27'; btn.style.color='#000';
+      document.getElementById('comodin-label').textContent='🔥 Comodin ACTIVADO! Toca de nuevo para desactivar';
+    } else {
+      btn.style.background='#2a1a00'; btn.style.color='#f5c842';
+      document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy';
+    }
     window.updatePreview();
   }
 
   window.onPlayerChange = function() {
     const player = document.getElementById('player-select').value;
     comodinActive = false;
-    ['act1','act2','act3','act4'].forEach(a => { document.getElementById(a).checked = false; });
-    document.getElementById('points-preview').style.display = 'none';
-    document.getElementById('auto-rules-preview').style.display = 'none';
-    document.getElementById('submit-btn').disabled = true;
-    document.getElementById('already-reported').innerHTML = '';
-    document.getElementById('already-reported').style.display = 'none';
-    if(!player) { document.getElementById('report-form').style.display='none'; return; }
-    if(hasReportedToday(player)) {
-      document.getElementById('already-reported').style.display = 'block';
-      document.getElementById('already-reported').innerHTML = '<div class="alert-box alert-warn">Ya reportaste hoy. Volvé mañana!</div>';
-      document.getElementById('report-form').style.display = 'none'; return;
+    ['act1','act2','act3','act4'].forEach(a=>{ document.getElementById(a).checked=false; });
+    document.getElementById('points-preview').style.display='none';
+    document.getElementById('auto-rules-preview').style.display='none';
+    document.getElementById('submit-btn').disabled=true;
+    document.getElementById('already-reported').innerHTML='';
+    document.getElementById('already-reported').style.display='none';
+    if(!player){ document.getElementById('report-form').style.display='none'; return; }
+    if(hasReportedToday(player)){
+      document.getElementById('already-reported').style.display='block';
+      document.getElementById('already-reported').innerHTML='<div class="alert-box alert-warn">Ya reportaste hoy. Volvé mañana! 🍺</div>';
+      document.getElementById('report-form').style.display='none'; return;
     }
-    document.getElementById('report-form').style.display = 'block';
+    document.getElementById('report-form').style.display='block';
     const btn = document.getElementById('comodin-btn');
-    if(state.comodinesUsed[player]) { btn.disabled=true; document.getElementById('comodin-label').textContent='🔥 Comodin ya usado este mes'; }
-    else { btn.disabled=false; btn.style.background='#2a1a00'; btn.style.color='#f5c842'; document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy'; }
+    if(state.comodinesUsed[player]){
+      btn.disabled=true;
+      document.getElementById('comodin-label').textContent='🔥 Comodin ya usado este mes';
+    } else {
+      btn.disabled=false; btn.style.background='#2a1a00'; btn.style.color='#f5c842';
+      document.getElementById('comodin-label').textContent='🔥 Activar Comodin All in — Duplica los puntos de hoy';
+    }
   }
 
   window.submitReport = async function() {
@@ -412,18 +500,40 @@ function formatDateSpanish(dateStr) {
     const acts = ['act1','act2','act3','act4'].filter(a=>document.getElementById(a).checked);
     if(!acts.length) return;
     const {pts:basePts, effective} = calcBasePoints(acts);
-    const autoRules = calcAutoRules(player,acts,reportingDateStr());
-    let autoRulePts = 0; autoRules.forEach(r => autoRulePts += r.pts);
+    const autoRules = calcAutoRules(player, acts, reportingDateStr());
+    let autoRulePts = 0; autoRules.forEach(r=>autoRulePts+=r.pts);
     const subTotal = basePts + autoRulePts;
-    const finalPts = comodinActive ? subTotal * 2 : subTotal;
-    if(!state.reports[player]) state.reports[player] = {};
-    state.reports[player][reportingDateStr()] = { acts:effective, autoRules:autoRules.map(r=>r.id), basePoints:basePts, autoPoints:autoRulePts, comodinUsed:comodinActive, totalPoints:finalPts };
-    if(comodinActive) state.comodinesUsed[player] = true;
+    const finalPts = comodinActive ? subTotal*2 : subTotal;
+    if(!state.reports[player]) state.reports[player]={};
+    state.reports[player][reportingDateStr()] = {
+      acts: effective,
+      autoRules: autoRules.map(r=>r.id),
+      basePoints: basePts,
+      autoPoints: autoRulePts,
+      comodinUsed: comodinActive,
+      totalPoints: finalPts
+    };
+    if(comodinActive) state.comodinesUsed[player]=true;
     await saveState();
     comodinActive = false;
-    document.getElementById('report-form').style.display = 'none';
-    document.getElementById('already-reported').style.display = 'block';
-    document.getElementById('already-reported').innerHTML = `<div class="alert-box alert-success">Jornada reportada! +${finalPts} pts hoy. Volves mañana! 🍺</div>`;
+
+    // Confirmation with full breakdown
+    let msg = `<div class="alert-box alert-success">`;
+    msg += `<div style="font-size:16px;font-weight:600;margin-bottom:10px;">+${finalPts} pts reportados! 🍺</div>`;
+    msg += `<div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Actividades</div>`;
+    msg += effective.map(a=>`<div style="font-size:13px;margin-bottom:3px;">✅ ${ACT_LABELS[a]||a}</div>`).join('');
+    if(autoRules.length>0){
+      msg += `<div style="font-size:12px;color:#aaa;margin-top:8px;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Reglas activadas</div>`;
+      msg += autoRules.map(r=>`<div style="font-size:13px;color:#f5c842;margin-bottom:3px;">⚡ ${r.name} (+${r.pts} pts)</div>`).join('');
+    }
+    if(state.comodinesUsed[player])
+      msg += `<div style="font-size:13px;color:#e070e0;margin-top:8px;">🔥 Comodin All in usado! Puntos x2</div>`;
+    msg += `<div style="font-size:12px;color:#aaa;margin-top:10px;">Volvé mañana a reportar!</div>`;
+    msg += `</div>`;
+
+    document.getElementById('report-form').style.display='none';
+    document.getElementById('already-reported').style.display='block';
+    document.getElementById('already-reported').innerHTML=msg;
     renderLeaderboard();
   }
 
@@ -431,15 +541,15 @@ function formatDateSpanish(dateStr) {
     const reports = getPlayerReports(player);
     if(!Object.keys(reports).length) return 0;
     let total = 0;
-    Object.values(reports).forEach(r => total += (r.totalPoints||0));
+    Object.values(reports).forEach(r=>total+=(r.totalPoints||0));
     const daysSince = getDaysSinceLastReport(player);
-    if(daysSince >= 7) total -= Math.floor(daysSince/7) * 5;
+    if(daysSince>=7) total -= Math.floor(daysSince/7)*5;
     return total;
   }
 
   function renderLeaderboard() {
-    const sorted = [...PLAYERS].map(p=>({p, pts:getTotalPoints(p)})).sort((a,b)=>b.pts-a.pts);
-    document.getElementById('leaderboard-list').innerHTML = sorted.map((item,i) =>
+    const sorted = [...PLAYERS].map(p=>({p,pts:getTotalPoints(p)})).sort((a,b)=>b.pts-a.pts);
+    document.getElementById('leaderboard-list').innerHTML = sorted.map((item,i)=>
       `<div class="leaderboard-row"><span class="rank">${RANK_ICONS[i]}</span><span class="player-name">${PLAYER_LABELS[item.p]}</span><span class="player-pts">${item.pts} <span class="pts-label">pts</span></span></div>`
     ).join('');
   }
@@ -447,13 +557,23 @@ function formatDateSpanish(dateStr) {
   window.renderHistory = function() {
     const player = document.getElementById('history-player-select').value;
     const list = document.getElementById('history-list');
-    if(!player) { list.innerHTML=''; return; }
+    if(!player){ list.innerHTML=''; return; }
     const reports = getPlayerReports(player);
     const dates = Object.keys(reports).sort().reverse();
-    if(!dates.length) { list.innerHTML='<p style="font-size:13px;color:#aaa;padding-top:8px;">Sin reportes aún.</p>'; return; }
-    list.innerHTML = dates.map(d => {
+    if(!dates.length){ list.innerHTML='<p style="font-size:13px;color:#aaa;padding-top:8px;">Sin reportes aún.</p>'; return; }
+    list.innerHTML = dates.map(d=>{
       const r = reports[d];
-      return `<div class="history-row"><span>${d}</span><span style="font-size:13px;color:#fff;font-weight:500;">+${r.totalPoints} pts${r.comodinUsed?' 🔥':''}</span></div>`;
+      const actTags = (r.acts||[]).map(a=>`<span class="htag act">${ACT_LABELS[a]||a}</span>`).join('');
+      const autoTags = (r.autoRules||[]).map(id=>`<span class="htag auto">${RULE_LABELS[id]||id}</span>`).join('');
+      const comodinTag = r.comodinUsed ? `<span class="htag comodin">🔥 Comodin x2</span>` : '';
+      return `
+        <div class="history-entry">
+          <div class="history-entry-header">
+            <span class="history-entry-date">📅 ${formatDateSpanish(d)}</span>
+            <span class="history-entry-pts">+${r.totalPoints} pts${r.comodinUsed?' 🔥':''}</span>
+          </div>
+          <div class="history-entry-body">${actTags}${autoTags}${comodinTag}</div>
+        </div>`;
     }).join('');
   }
 
@@ -463,15 +583,21 @@ function formatDateSpanish(dateStr) {
     el.classList.add('active');
     document.getElementById('tab-'+tab).classList.add('active');
     if(tab==='leaderboard') renderLeaderboard();
+    if(tab==='history'){ const hp=document.getElementById('history-player-select').value; if(hp) renderHistory(); }
   }
 
-  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const now = new Date();
-  document.getElementById('today-label').textContent = days[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' 2026';
-  const _rd = new Date(); _rd.setDate(_rd.getDate()-1);
-  const _rdLabel = formatDateSpanish(_rd.toISOString().split('T')[0]);
-  document.getElementById('reporting-date-banner').textContent = '⚠️ Recordá que estás reportando la actividad correspondiente al '+_rdLabel;
+  // ── INIT ──
+  const DAYS_ES  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const todayD = parseDateParts(todayStr());
+  document.getElementById('today-label').textContent =
+    DAYS_ES[todayD.getDay()]+', '+todayD.getDate()+' de '+MONTHS_ES[todayD.getMonth()]+' 2026 (Hora El Salvador)';
+
+  const rdLabel = formatDateSpanish(reportingDateStr());
+  document.getElementById('reporting-date-banner').textContent =
+    '⚠️ Recordá que estás reportando la actividad correspondiente al '+rdLabel;
+  document.getElementById('activities-label').textContent = 'Actividades del '+rdLabel;
+
   loadState();
 </script>
 </body>
